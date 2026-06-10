@@ -1,0 +1,128 @@
+name: CI/CD — devarch
+
+on:
+  push:
+    branches: ["main", "develop", "*/feature/*"]
+  pull_request:
+    branches: ["main", "develop"]
+
+jobs:
+  lint:
+    name: Lint (flake8)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install linting dependencies
+        run: pip install flake8
+
+      - name: Run linter
+        run: flake8 . --exclude=venv,migrations --max-line-length=120
+
+  tests:
+    name: Unit tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    needs: lint
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run unit tests
+        env:
+          JWT_SECRET_KEY: test-secret-key-for-ci-pipeline-only
+          DB_PATH: ":memory:"
+          RABBITMQ_HOST: localhost
+          RABBITMQ_USER: devarch
+          RABBITMQ_PASS: devarch123
+        run: |
+          python -m pytest tests/unit/ \
+            --tb=short -v \
+            --junitxml=reports/junit-${{ matrix.python-version }}.xml
+
+      - name: Upload test reports (artifacts)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-reports-${{ matrix.python-version }}
+          path: reports/
+          retention-days: 7
+
+  deploy:
+    name: Deploy to AWS Elastic Beanstalk
+    runs-on: ubuntu-latest
+    needs: tests
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install EB CLI
+        run: pip install awsebcli
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Deploy to Elastic Beanstalk
+        run: eb deploy devarch-env --timeout 10
+
+      - name: Health check after deployment
+        id: health_check
+        run: |
+          STATUS=$(eb status devarch-env | grep "Health:" | awk '{print $2}')
+          echo "health=$STATUS" >> $GITHUB_OUTPUT
+          if [ "$STATUS" != "Green" ]; then
+            echo "Health check failed: $STATUS"
+            exit 1
+          fi
+
+      - name: Automatic rollback on failure
+        if: failure() && steps.health_check.outcome == 'failure'
+        run: |
+          echo "Deployment failed — rolling back..."
+          PREVIOUS=$(eb appversion | grep -m2 "version" | tail -1 | awk '{print $2}')
+          eb deploy devarch-env --version-label $PREVIOUS
