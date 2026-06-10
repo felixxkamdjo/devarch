@@ -1,0 +1,136 @@
+# /docker-compose.yml
+
+services:
+
+  #  FRONTEND 
+  frontend:
+    build: ./front-end
+    container_name: frontend
+
+    ports:
+      - "8080:80"           # accès navigateur : http://localhost:8080
+
+    depends_on:
+      - api-gateway         # attend que la gateway soit up
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+
+  #  API GATEWAY 
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+
+    ports:
+      - "8000:8000"         # accès navigateur : http://localhost:8000
+
+    depends_on:
+      - auth-service
+      - content-service
+      - media-service
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+
+  #  AUTH SERVICE 
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    env_file:
+      - ./auth-service/.env
+
+    ports:
+      - "8002:8002"
+
+    volumes:
+      - ./auth-service/db:/app/db
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+
+  #  CONTENT SERVICE 
+  content-service:
+    build: ./content-service
+    container_name: content-service
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=devarch
+      - RABBITMQ_PASS=devarch123
+
+    ports:
+      - "8003:8003"
+
+    volumes:
+      - ./content-service/db:/app/db
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+
+  #  MEDIA SERVICE 
+  media-service:
+    build: ./media-service
+    container_name: media-service
+
+    ports:
+      - "8004:8004"
+
+    volumes:
+      - ./media-service/storage:/app/storage
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+  
+
+  # MESSAGE BROKER
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"    # AMQP - connexions des services
+      - "15672:15672"  # Dashboard web management
+    environment:
+      RABBITMQ_DEFAULT_USER: devarch
+      RABBITMQ_DEFAULT_PASS: devarch123
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - backend
+  
+  # CONSUMER SERVICE 
+  consumer-service:
+    build: ./consumer-service
+    container_name: consumer-service
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=devarch
+      - RABBITMQ_PASS=devarch123
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - backend
+
+
+#  NETWORKS ─
+networks:
+  backend:
+    driver: bridge

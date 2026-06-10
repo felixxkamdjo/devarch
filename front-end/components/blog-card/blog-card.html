@@ -1,0 +1,24 @@
+<!-- Template for a blog card — cloned by JS -->
+<template id="blog-card-template">
+  <article class="blog-card">
+    <a class="blog-card__img-wrap" href="#">
+      <img class="blog-card__img" src="" alt="" loading="lazy" />
+      <span class="blog-card__category badge badge--red"></span>
+    </a>
+    <div class="blog-card__body">
+      <div class="blog-card__meta">
+        <span class="blog-card__views">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="blog-card__views-count"></span>
+        </span>
+        <span class="blog-card__comments">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="blog-card__comments-count"></span>
+        </span>
+      </div>
+      <h3 class="blog-card__title"></h3>
+      <p class="blog-card__author">by <strong class="blog-card__author-name"></strong></p>
+      <p class="blog-card__excerpt"></p>
+    </div>
+  </article>
+</template>

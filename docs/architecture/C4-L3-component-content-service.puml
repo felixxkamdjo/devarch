@@ -1,0 +1,79 @@
+@startuml C4-Component-ContentService
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagramme de Composants (C4 Niveau 3) — content-service
+
+Container(gateway, "api-gateway", "Python + nginx", "Point d'entrée")
+Container(auth, "auth-service", "Python stdlib", "Validation JWT")
+ContainerDb(db, "articles.db", "SQLite", "Articles, catégories, commentaires")
+System_Ext(rabbitmq, "RabbitMQ", "Broker AMQP")
+
+Container_Boundary(content, "content-service") {
+
+    Component(server, "server.py", "Python stdlib\nHTTPServer", "Point d'entrée du service.\nDémarre le serveur HTTP\nsur le port configuré.")
+
+    Component(router, "router.py", "Python", "Dispatche les requêtes\nHTTP vers les handlers\nselon la méthode et le path.")
+
+    Component(h_articles, "handlers/articles.py", "Python", "Gère les requêtes HTTP\npour les articles.\nGET /articles, POST /articles,\nGET /articles/:id, etc.")
+
+    Component(h_categories, "handlers/categories.py", "Python", "Gère les requêtes HTTP\npour les catégories.")
+
+    Component(h_comments, "handlers/comments.py", "Python", "Gère les requêtes HTTP\npour les commentaires.")
+
+    Component(s_articles, "services/articles.py", "Python", "Logique métier articles.\nOrchestre validation,\ncréation, publication.")
+
+    Component(s_categories, "services/categories.py", "Python", "Logique métier catégories.")
+
+    Component(s_comments, "services/comments.py", "Python", "Logique métier commentaires.")
+
+    Component(r_articles, "repositories/article_repository.py", "Python + SQLite", "Accès aux données articles.\nRequêtes SQL CRUD.")
+
+    Component(r_categories, "repositories/category_repository.py", "Python + SQLite", "Accès aux données catégories.")
+
+    Component(r_comments, "repositories/comment_repository.py", "Python + SQLite", "Accès aux données commentaires.")
+
+    Component(publisher, "events/publisher.py", "Python + pika", "Publie des messages\nsur RabbitMQ après\nles opérations métier.")
+
+    Component(jwt_util, "utils/jwt.py", "Python", "Extrait et transmet\nle token JWT pour\nvalidation auprès de auth-service.")
+
+    Component(http_util, "utils/http.py", "Python", "Helpers HTTP :\nsérialisation JSON,\ncodes de réponse, headers.")
+}
+
+' Flux entrant
+Rel(gateway, server, "HTTP Request", "HTTP")
+Rel(server, router, "Dispatche")
+Rel(router, h_articles, "Route articles")
+Rel(router, h_categories, "Route categories")
+Rel(router, h_comments, "Route comments")
+
+' Handlers → Services
+Rel(h_articles, s_articles, "Délègue la logique métier")
+Rel(h_categories, s_categories, "Délègue")
+Rel(h_comments, s_comments, "Délègue")
+
+' Services - Repositories
+Rel(s_articles, r_articles, "Accès données")
+Rel(s_categories, r_categories, "Accès données")
+Rel(s_comments, r_comments, "Accès données")
+
+' Services - Events
+Rel(s_articles, publisher, "Publie article_created\narticle_updated, etc.")
+
+' Repositories - DB
+Rel(r_articles, db, "SQL")
+Rel(r_categories, db, "SQL")
+Rel(r_comments, db, "SQL")
+
+' Publisher - RabbitMQ
+Rel(publisher, rabbitmq, "AMQP publish")
+
+' JWT validation - auth-service
+Rel(jwt_util, auth, "GET /auth/validate\n(token dans header)", "HTTP")
+
+' Utils transversal
+Rel(h_articles, http_util, "Utilise")
+Rel(h_articles, jwt_util, "Vérifie l'authentification")
+
+@enduml

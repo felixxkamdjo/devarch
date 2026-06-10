@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevArch — Blog</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../../styles/base.css" />
+  <link rel="stylesheet" href="../../components/navbar/navbar.css" />
+  <link rel="stylesheet" href="../../components/blog-card/blog-card.css" />
+  <link rel="stylesheet" href="./home.css" />
+
+  <!-- Scripts -->
+  <script type="module" src="../../scripts/main.js" defer></script>
+  <script type="module" src="../../scripts/home/home.js" defer></script>
+
+</head>
+<body>
+
+  <!-- Navbar injected by JS -->
+  <div id="navbar-mount"></div>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- User card -->
+      <div class="sidebar__user" id="sidebarUser" style="display:none">
+        <div class="sidebar__avatar" id="sidebarAvatar"></div>
+        <p class="sidebar__user-name" id="sidebarName"></p>
+      </div>
+
+      <div class="sidebar__section">
+        <p class="sidebar__section-label">Category</p>
+        <ul class="sidebar__cat-list" id="categoryList">
+          <li>
+            <button class="sidebar__cat-item active" data-category="all">All</button>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <!-- Featured article -->
+      <section class="featured" id="featuredSection" style="display:none">
+        <div class="featured__badge-wrap">
+          <span class="badge badge--red" id="featuredCategory"></span>
+        </div>
+        <a href="#" class="featured__img-wrap" id="featuredLink">
+          <img src="" alt="" class="featured__img" id="featuredImg" />
+        </a>
+        <div class="featured__meta" id="featuredMeta"></div>
+        <a href="#" class="featured__title-link" id="featuredTitleLink">
+          <h1 class="featured__title" id="featuredTitle"></h1>
+        </a>
+        <div class="featured__actions">
+          <button class="btn btn--outline-accent btn--sm" id="featuredSave">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            Save to pocket
+          </button>
+          <button class="btn btn--ghost btn--sm" id="featuredShare">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share
+          </button>
+        </div>
+        <div class="featured__excerpt" id="featuredExcerpt"></div>
+      </section>
+
+      <!-- Article grid -->
+      <section class="articles-section">
+        <div class="articles-section__header">
+          <h2 class="articles-section__title" id="articlesTitle">Latest</h2>
+          <button class="btn btn--ghost btn--sm" id="articlesLoadMore">Load more</button>
+        </div>
+
+        <!-- Loading skeleton -->
+        <div class="skeleton-grid" id="skeletonGrid">
+          <div class="skeleton-card" aria-hidden="true">
+            <div class="skeleton skeleton--img"></div>
+            <div class="skeleton skeleton--line" style="width:60%"></div>
+            <div class="skeleton skeleton--title"></div>
+            <div class="skeleton skeleton--line" style="width:80%"></div>
+          </div>
+          <div class="skeleton-card" aria-hidden="true">
+            <div class="skeleton skeleton--img"></div>
+            <div class="skeleton skeleton--line" style="width:50%"></div>
+            <div class="skeleton skeleton--title"></div>
+            <div class="skeleton skeleton--line" style="width:90%"></div>
+          </div>
+          <div class="skeleton-card" aria-hidden="true">
+            <div class="skeleton skeleton--img"></div>
+            <div class="skeleton skeleton--line" style="width:70%"></div>
+            <div class="skeleton skeleton--title"></div>
+            <div class="skeleton skeleton--line" style="width:65%"></div>
+          </div>
+        </div>
+
+        <!-- Actual articles grid -->
+        <div class="articles-grid" id="articlesGrid" style="display:none"></div>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState" style="display:none">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <p>No articles found.</p>
+          <a href="../editor/editor.html" class="btn btn--primary btn--sm">Write the first one</a>
+        </div>
+      </section>
+    </main>
+
+    <!-- Right sidebar: Related -->
+    <aside class="related-sidebar">
+      <div class="related-sidebar__header">
+        <h3 class="related-sidebar__title">Related News</h3>
+        <a href="#" class="related-sidebar__see-all">See all</a>
+      </div>
+      <div class="related-list" id="relatedList"></div>
+    </aside>
+  </div>
+
+  <!-- Blog card template -->
+  <template id="blog-card-template">
+    <article class="blog-card">
+      <a class="blog-card__img-wrap" href="#">
+        <img class="blog-card__img" src="" alt="" loading="lazy" />
+        <span class="blog-card__category badge badge--red"></span>
+      </a>
+      <div class="blog-card__body">
+        <div class="blog-card__meta">
+          <span class="blog-card__views">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span class="blog-card__views-count"></span>
+          </span>
+        </div>
+        <h3 class="blog-card__title"></h3>
+        <p class="blog-card__author">by <strong class="blog-card__author-name"></strong></p>
+        <p class="blog-card__excerpt"></p>
+      </div>
+    </article>
+  </template>
+
+  <!-- Related card template -->
+  <template id="related-card-template">
+    <article class="related-card">
+      <a class="related-card__img-wrap" href="#">
+        <img class="related-card__img" src="" alt="" loading="lazy" />
+      </a>
+      <div class="related-card__body">
+        <span class="related-card__badge badge badge--blue"></span>
+        <div class="related-card__views">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="related-card__views-count"></span>
+        </div>
+        <h4 class="related-card__title"></h4>
+      </div>
+    </article>
+  </template>
+
+</body>
+</html>

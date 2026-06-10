@@ -1,0 +1,19 @@
+@startuml C4-Context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagramme de Contexte (C4 Niveau 1) — devarch
+
+Person(lecteur, "Lecteur", "Consulte les articles\ndu blog sans compte")
+Person(auteur, "Auteur / Admin", "Rédige et publie\ndes articles, gère le contenu")
+
+System(devarch, "devarch", "Plateforme de blog headless.\nPermet la publication, la consultation\nd'articles et la gestion des médias.")
+
+System_Ext(rabbitmq, "RabbitMQ", "Broker de messages.\nGère les événements\nasynchrones entre services.")
+
+Rel(lecteur, devarch, "Consulte les articles", "HTTPS")
+Rel(auteur, devarch, "Publie et gère le contenu", "HTTPS")
+Rel(devarch, rabbitmq, "Publie / consomme des événements", "AMQP")
+
+@enduml

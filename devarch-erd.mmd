@@ -1,0 +1,66 @@
+erDiagram
+
+    AUTEUR {
+        int     id              PK
+        string  email
+        string  user_firstname
+        string  user_lastname
+        string  role
+        string  password_hash
+        string  salt
+        date    created_at
+        date    updated_at
+    }
+
+    ARTICLE {
+        int     id              PK
+        string  title
+        text    content
+        string  status
+        date    created_at
+        date    updated_at
+        int     author_id       FK
+    }
+
+    COMMENTAIRE {
+        int     id              PK
+        text    text
+        date    created_at
+        date    updated_at
+        int     author_id       FK
+        int     article_id      FK
+    }
+
+    CATEGORIE {
+        int     id_cat          PK
+        string  name
+        date    created_at
+        date    updated_at
+    }
+
+    APPARTENIR {
+        int     id              PK
+        int     article_id      FK
+        int     id_cat          FK
+        date    created_at
+        date    updated_at
+    }
+
+    IMAGE_MEDIA {
+        int     id              PK
+        string  filename
+        string  mime_type
+        string  url
+        date    created_at
+        int     article_id      FK
+    }
+
+    AUTEUR       ||--o{ ARTICLE      : "écrit"
+    AUTEUR       ||--o{ COMMENTAIRE  : "poste"
+
+    ARTICLE      ||--o{ COMMENTAIRE  : "reçoit"
+
+    ARTICLE      ||--o{ APPARTENIR   : "classé dans"
+    CATEGORIE    ||--o{ APPARTENIR   : "regroupe"
+
+    ARTICLE      ||--o{ IMAGE_MEDIA  : "possède"

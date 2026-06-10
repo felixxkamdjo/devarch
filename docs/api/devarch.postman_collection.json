@@ -1,0 +1,403 @@
+{
+  "info": {
+    "name": "devarch API",
+    "description": "Collection complète de l'API devarch - plateforme de blog headless microservices.\n\nAvant de commencer :\n1. Démarrer la stack : `make up`\n2. Lancer Register ou Login\n3. Le token JWT est automatiquement sauvegardé dans la variable `token`",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT Bearer token — rempli automatiquement après login/register"
+    },
+    {
+      "key": "article_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "category_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+
+    {
+      "name": "Auth",
+      "description": "Inscription, connexion et profil utilisateur",
+      "item": [
+
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data && res.data.token) {",
+                  "    pm.collectionVariables.set('token', res.data.token);",
+                  "    console.log('Token saved:', res.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_firstname\": \"Félix\",\n  \"user_lastname\": \"Kamdjo\",\n  \"email\": \"felix@devarch.io\",\n  \"password\": \"s3cr3tP@ss\"\n}"
+            },
+            "description": "Crée un compte et retourne un JWT automatiquement.\nLe token est sauvegardé dans la variable `token`."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data && res.data.token) {",
+                  "    pm.collectionVariables.set('token', res.data.token);",
+                  "    console.log('Token saved:', res.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"felix@devarch.io\",\n  \"password\": \"s3cr3tP@ss\"\n}"
+            },
+            "description": "Connecte un utilisateur existant.\nLe token JWT est sauvegardé automatiquement dans `token`."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Current User (me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Retourne les informations de l'utilisateur connecté.\nNécessite un token valide dans `token`."
+          },
+          "response": []
+        }
+
+      ]
+    },
+
+    {
+      "name": "Articles",
+      "description": "CRUD des articles du blog",
+      "item": [
+
+        {
+          "name": "List Articles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/articles?page=1&limit=9",
+              "host": ["{{base_url}}"],
+              "path": ["articles"],
+              "query": [
+                { "key": "page",     "value": "1" },
+                { "key": "limit",    "value": "9" },
+                { "key": "category", "value": "",  "disabled": true, "description": "Filtrer par category_id" }
+              ]
+            },
+            "description": "Liste paginée des articles.\nQuery params optionnels : page, limit, category (ID)."
+          },
+          "response": []
+        },
+
+        {
+          "name": "List Articles — filtrés par catégorie",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/articles?page=1&limit=9&category={{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["articles"],
+              "query": [
+                { "key": "page",     "value": "1" },
+                { "key": "limit",    "value": "9" },
+                { "key": "category", "value": "{{category_id}}" }
+              ]
+            }
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Article by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/articles/{{article_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["articles", "{{article_id}}"]
+            }
+          },
+          "response": []
+        },
+
+        {
+          "name": "Create Article",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Optionnel : sauvegarder l'ID si l'API le retourne",
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) {",
+                  "    pm.collectionVariables.set('article_id', res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/articles",
+              "host": ["{{base_url}}"],
+              "path": ["articles"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Introduction aux microservices\",\n  \"content\": \"Les microservices sont une approche architecturale qui structure une application comme un ensemble de petits services...\",\n  \"category_id\": 1,\n  \"image_url\": null\n}"
+            },
+            "description": "Crée un article. L'author_id est extrait du token JWT côté serveur."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Article",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/articles/{{article_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["articles", "{{article_id}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Introduction aux microservices (v2)\",\n  \"content\": \"Contenu mis à jour...\",\n  \"status\": \"published\",\n  \"category_id\": 1,\n  \"image_url\": null\n}"
+            }
+          },
+          "response": []
+        },
+
+        {
+          "name": "Delete Article",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/articles/{{article_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["articles", "{{article_id}}"]
+            }
+          },
+          "response": []
+        }
+
+      ]
+    },
+
+    {
+      "name": "Categories",
+      "description": "Gestion des catégories d'articles",
+      "item": [
+
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories",
+              "host": ["{{base_url}}"],
+              "path": ["categories"]
+            }
+          },
+          "response": []
+        },
+
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/categories",
+              "host": ["{{base_url}}"],
+              "path": ["categories"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Architecture logicielle\",\n  \"description\": \"Articles sur les patterns d'architecture\"\n}"
+            }
+          },
+          "response": []
+        }
+
+      ]
+    },
+
+    {
+      "name": "Comments",
+      "description": "Commentaires sur les articles",
+      "item": [
+
+        {
+          "name": "List Comments by Article",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/comments/{{article_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["comments", "{{article_id}}"]
+            }
+          },
+          "response": []
+        },
+
+        {
+          "name": "Create Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/comments",
+              "host": ["{{base_url}}"],
+              "path": ["comments"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"article_id\": 1,\n  \"content\": \"Très bon article, merci pour le partage !\"\n}"
+            }
+          },
+          "response": []
+        }
+
+      ]
+    },
+
+    {
+      "name": "Media",
+      "description": "Upload et récupération des fichiers media",
+      "item": [
+
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/upload",
+              "host": ["{{base_url}}"],
+              "path": ["upload"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "",
+                  "description": "Sélectionner un fichier image ou vidéo"
+                }
+              ]
+            },
+            "description": "Upload un fichier. Retourne l'URL publique du fichier stocké."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Media File",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/media/586caaf0-e487-4779-81b7-2dab6a4794d2.bin",
+              "host": ["{{base_url}}"],
+              "path": ["media", "586caaf0-e487-4779-81b7-2dab6a4794d2.bin"]
+            },
+            "description": "Récupère un fichier par son nom (UUID + extension)."
+          },
+          "response": []
+        }
+
+      ]
+    }
+
+  ]
+}

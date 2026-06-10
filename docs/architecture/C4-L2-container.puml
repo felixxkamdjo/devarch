@@ -1,0 +1,62 @@
+@startuml C4-Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagramme de Conteneurs (C4 Niveau 2) — devarch
+
+Person(lecteur, "Lecteur")
+Person(auteur, "Auteur / Admin")
+
+System_Boundary(devarch, "devarch") {
+
+    Container(frontend, "front-end", "HTML + CSS + JS ES6+\nnginx", "Interface utilisateur du blog.\nPages : home, article, editor,\nlogin, signup.")
+
+    Container(gateway, "api-gateway", "Python 3.12 stdlib\n+ nginx", "Point d'entrée unique de l'API.\nRoute les requêtes HTTP vers\nles services internes.")
+
+    Container(auth, "auth-service", "Python 3.12 stdlib", "Gestion des utilisateurs.\nAuthentification JWT.\nRegistration et login.")
+
+    Container(content, "content-service", "Python 3.12 stdlib", "Gestion des articles,\ncatégories et commentaires.\nPublie des événements.")
+
+    Container(media, "media-service", "Python 3.12 stdlib", "Upload et stockage\ndes fichiers media\n(images).")
+
+    Container(consumer, "consumer-service", "Python 3.12 stdlib", "Consommateur RabbitMQ.\nTraite les événements\nasynchrones publiés\npar content-service.")
+
+    ContainerDb(auth_db, "auth.db", "SQLite", "Utilisateurs,\ncredentials, sessions.")
+
+    ContainerDb(content_db, "articles.db", "SQLite", "Articles, catégories,\ncommentaires.")
+
+    ContainerDb(media_db, "media.db", "SQLite", "Métadonnées\ndes fichiers media.")
+
+    ContainerDb(media_storage, "Stockage fichiers", "Système de fichiers\nDocker volume", "Fichiers binaires,\nimages, vidéos.")
+}
+
+System_Ext(rabbitmq, "RabbitMQ", "Broker de messages AMQP")
+
+' Relations clients
+Rel(lecteur, frontend, "Accède au blog", "HTTPS")
+Rel(auteur, frontend, "Gère le contenu", "HTTPS")
+
+' Frontend vers gateway
+Rel(frontend, gateway, "Appels API REST", "HTTP")
+
+' Gateway vers services
+Rel(gateway, auth, "Route /api/auth/*", "HTTP")
+Rel(gateway, content, "Route /api/content/*", "HTTP")
+Rel(gateway, media, "Route /api/media/*", "HTTP")
+
+' content-service valide JWT via auth-service
+Rel(content, auth, "Valide le token JWT", "HTTP interne")
+Rel(media, auth, "Valide le token JWT", "HTTP interne")
+
+' Services vers leurs DBs
+Rel(auth, auth_db, "Lit / Écrit", "SQLite")
+Rel(content, content_db, "Lit / Écrit", "SQLite")
+Rel(media, media_db, "Lit / Écrit", "SQLite")
+Rel(media, media_storage, "Stocke les fichiers", "Filesystem")
+
+' Événements asynchrones
+Rel(content, rabbitmq, "Publie des événements\n(ex: article_created)", "AMQP")
+Rel(consumer, rabbitmq, "Consomme les événements", "AMQP")
+
+@enduml

@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS users (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    email TEXT NOT NULL UNIQUE,
+    user_firstname VARCHAR(20),
+    user_lastname VARCHAR(20) NOT NULL,
+
+    role VARCHAR(20) DEFAULT 'author',
+
+    password_hash VARCHAR(255) NOT NULL,
+    salt VARCHAR(255) NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

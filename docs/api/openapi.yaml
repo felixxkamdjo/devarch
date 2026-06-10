@@ -1,0 +1,732 @@
+openapi: "3.0.3"
+
+info:
+  title: devarch API
+  description: |
+    API REST de la plateforme de blog headless **devarch**.
+    
+    Tous les appels passent par l'`api-gateway` qui route vers les services internes :
+    - `/auth/*` -> `auth-service`
+    - `/articles/*`, `/categories/*`, `/comments/*` -> `content-service`
+    - `/media/*`, `/upload/*` -> `media-service`
+    
+    Les endpoints protégés nécessitent un token JWT dans le header `Authorization: Bearer <token>`.
+  version: "1.0.0"
+  contact:
+    name: Équipe devarch
+
+servers:
+  - url: http://localhost:8000
+    description: API Gateway (développement local)
+
+tags:
+  - name: Auth
+    description: Authentification et gestion des utilisateurs
+  - name: Articles
+    description: Gestion des articles du blog
+  - name: Categories
+    description: Gestion des catégories
+  - name: Comments
+    description: Gestion des commentaires
+  - name: Media
+    description: Upload et gestion des fichiers media
+
+# SECURITY SCHEME
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    # Shared 
+    SuccessMessage:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "Message d'erreur"
+
+    #  Auth 
+    RegisterRequest:
+      type: object
+      required: [user_firstname, user_lastname, email, password]
+      properties:
+        user_firstname:
+          type: string
+          example: "Félix"
+        user_lastname:
+          type: string
+          example: "Kamdjo"
+        email:
+          type: string
+          format: email
+          example: "felix@devarch.io"
+        password:
+          type: string
+          format: password
+          minLength: 6
+          example: "s3cr3tP@ss"
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: "felix@devarch.io"
+        password:
+          type: string
+          format: password
+          example: "s3cr3tP@ss"
+
+    AuthData:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT Bearer token
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        user:
+          $ref: "#/components/schemas/UserPublic"
+
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/AuthData"
+
+    UserPublic:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 1
+        user_firstname:
+          type: string
+          example: "Félix"
+        user_lastname:
+          type: string
+          example: "Kamdjo"
+        email:
+          type: string
+          example: "felix@devarch.io"
+
+    CurrentUserResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        user:
+          $ref: "#/components/schemas/UserPublic"
+
+    #  Articles
+    ArticleCreateRequest:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+          example: "Introduction aux microservices"
+        content:
+          type: string
+          example: "Les microservices sont une approche architecturale..."
+        category_id:
+          type: integer
+          nullable: true
+          example: 2
+        image_url:
+          type: string
+          nullable: true
+          example: "http://localhost:8000/media/images/cover.png"
+
+    ArticleUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Introduction aux microservices (mis à jour)"
+        content:
+          type: string
+          example: "Contenu mis à jour..."
+        status:
+          type: string
+          enum: [draft, published]
+          default: draft
+          example: "published"
+        category_id:
+          type: integer
+          nullable: true
+          example: 2
+        image_url:
+          type: string
+          nullable: true
+          example: "http://localhost:8000/media/images/cover.png"
+
+    Article:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Introduction aux microservices"
+        content:
+          type: string
+          example: "Les microservices sont une approche architecturale..."
+        status:
+          type: string
+          enum: [draft, published]
+          example: "published"
+        author_id:
+          type: integer
+          example: 1
+        author_name:
+          type: string
+          example: "Félix"
+        category_id:
+          type: integer
+          nullable: true
+          example: 2
+        image_url:
+          type: string
+          nullable: true
+          example: "http://localhost:8000/media/images/cover.png"
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-05-15T10:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-05-20T14:00:00Z"
+
+    ArticleListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Article"
+
+    ArticleSingleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/Article"
+
+    #  Categories
+    CategoryCreateRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          example: "Architecture logicielle"
+        description:
+          type: string
+          nullable: true
+          example: "Articles sur les patterns d'architecture"
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Architecture logicielle"
+        description:
+          type: string
+          nullable: true
+
+    CategoryListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+
+    # Comments
+    CommentCreateRequest:
+      type: object
+      required: [article_id, content]
+      properties:
+        article_id:
+          type: integer
+          example: 1
+        content:
+          type: string
+          example: "Très bon article, merci !"
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        article_id:
+          type: integer
+          example: 1
+        author_id:
+          type: integer
+          example: 2
+        content:
+          type: string
+          example: "Très bon article, merci !"
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-05-16T09:00:00Z"
+
+    CommentListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+
+# PATHS
+paths:
+
+  # AUTH
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Inscription d'un nouvel utilisateur
+      description: |
+        Crée un compte utilisateur puis effectue automatiquement
+        un login et retourne un token JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: Utilisateur créé et connecté
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Données invalides (email déjà utilisé, champs manquants…)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erreur serveur interne
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Connexion d'un utilisateur existant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Identifiants incorrects
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erreur serveur interne
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Récupère l'utilisateur actuellement connecté
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Données de l'utilisateur connecté
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUserResponse"
+        "401":
+          description: Token manquant ou invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ARTICLES
+  /articles:
+    get:
+      tags: [Articles]
+      summary: Liste les articles publiés
+      description: |
+        Retourne une liste paginée d'articles.
+        Filtrable par catégorie via le query param `category`.
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Numéro de page
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 9
+          description: Nombre d'articles par page
+        - name: category
+          in: query
+          schema:
+            type: integer
+          description: Filtrer par ID de catégorie
+      responses:
+        "200":
+          description: Liste des articles
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArticleListResponse"
+        "500":
+          description: Erreur serveur interne
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      tags: [Articles]
+      summary: Crée un nouvel article
+      description: |
+        Nécessite un token JWT valide.
+        L'`author_id` et l'`author_name` sont extraits du payload JWT,
+        ils ne doivent pas être fournis dans le body.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArticleCreateRequest"
+      responses:
+        "201":
+          description: Article créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+        "400":
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Token manquant ou invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /articles/{article_id}:
+    get:
+      tags: [Articles]
+      summary: Récupère un article par son ID
+      parameters:
+        - name: article_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Article trouvé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArticleSingleResponse"
+        "404":
+          description: Article non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      tags: [Articles]
+      summary: Met à jour un article existant
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: article_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArticleUpdateRequest"
+      responses:
+        "200":
+          description: Article mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+        "400":
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Non autorisé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      tags: [Articles]
+      summary: Supprime un article
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: article_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Article supprimé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+        "500":
+          description: Erreur serveur interne
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # CATEGORIES
+  /categories:
+    get:
+      tags: [Categories]
+      summary: Liste toutes les catégories
+      responses:
+        "200":
+          description: Liste des catégories
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryListResponse"
+
+    post:
+      tags: [Categories]
+      summary: Crée une nouvelle catégorie
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryCreateRequest"
+      responses:
+        "201":
+          description: Catégorie créée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+        "400":
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # COMMENTS
+  /comments:
+    post:
+      tags: [Comments]
+      summary: Ajoute un commentaire sur un article
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentCreateRequest"
+      responses:
+        "201":
+          description: Commentaire créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+        "400":
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /comments/{article_id}:
+    get:
+      tags: [Comments]
+      summary: Liste les commentaires d'un article
+      parameters:
+        - name: article_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Liste des commentaires
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentListResponse"
+        "404":
+          description: Article non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # MEDIA
+  /upload:
+    post:
+      tags: [Media]
+      summary: Upload un fichier media
+      description: |
+        Accepte un fichier binaire (image, vidéo, document).
+        Retourne l'URL publique du fichier uploadé.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Fichier uploadé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  url:
+                    type: string
+                    example: "http://localhost:8000/media/images/586caaf0.png"
+        "401":
+          description: Non autorisé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /media/{filename}:
+    get:
+      tags: [Media]
+      summary: Récupère un fichier media par son nom
+      parameters:
+        - name: filename
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "586caaf0-e487-4779-81b7-2dab6a4794d2.bin"
+      responses:
+        "200":
+          description: Fichier retourné
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Fichier non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
