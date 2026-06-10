@@ -110,6 +110,11 @@ class TestUpdateArticleService:
 class TestDeleteArticleService:
 
     def test_delete_appelle_repository_avec_bon_id(self):
-        with patch(f"{ARTICLES_SVC}.delete_article") as mock_delete:
-            delete_article_service(article_id=7)
+        with patch(f"{ARTICLES_SVC}.get_article_by_id", return_value={"id": 7, "author_id": 1}) as mock_get, \
+            patch(f"{ARTICLES_SVC}.delete_article") as mock_delete:
+            delete_article_service(
+                article_id=7,
+                requesting_user_id=1,
+                requesting_user_role="admin"
+            )
         mock_delete.assert_called_once_with(7)

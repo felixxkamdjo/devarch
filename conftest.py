@@ -12,6 +12,8 @@ content_service_root = project_root / "content-service"
 
 # Set default environment variables for testing
 os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key-for-pytest-only")
+os.environ.setdefault("DB_PATH", ":memory:")
+
 os.environ.setdefault("RABBITMQ_HOST", "localhost")
 os.environ.setdefault("RABBITMQ_USER", "devarch")
 os.environ.setdefault("RABBITMQ_PASS", "devarch123")

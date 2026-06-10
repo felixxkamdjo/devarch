@@ -104,5 +104,6 @@ class TestValidateUserToken:
         assert result["user_id"] == 1
 
     def test_token_invalide_leve_valueerror(self):
-        with pytest.raises(ValueError, match="Invalid or expired token"):
-            validate_user_token("pas_un_token")
+        with patch("auth_service.services.auth.verify_token", return_value=None):
+            with pytest.raises(ValueError, match=r"Invalid or expired token\."):
+                validate_user_token("pas_un_token")

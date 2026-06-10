@@ -42,3 +42,6 @@ rebuild:
 
 tree:
 	tree -I "venv|__pycache__"
+
+test-short:
+	python -m pytest tests/unit/ --tb=short -v 2>&1 | tail -20

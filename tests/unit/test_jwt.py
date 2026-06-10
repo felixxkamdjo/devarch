@@ -1,9 +1,25 @@
 # tests/unit/test_jwt.py
+import sys
 import time
 import pytest
+import importlib
+from pathlib import Path
+
+# Restaure le vrai module jwt pour ce fichier de test
+if "jwt" in sys.modules and hasattr(sys.modules["jwt"], "_mock_name"):
+    sys.modules.pop("jwt")
+    import jwt as _real_jwt
+    sys.modules["jwt"] = _real_jwt
+    # Recharge auth_service.utils.jwt avec le vrai jwt
+    if "auth_service.utils.jwt" in sys.modules:
+        sys.modules.pop("auth_service.utils.jwt")
+    _path = Path(__file__).parents[2] / "auth-service/utils/jwt.py"
+    spec = importlib.util.spec_from_file_location("auth_service.utils.jwt", _path)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["auth_service.utils.jwt"] = mod
+    spec.loader.exec_module(mod)
+
 from auth_service.utils.jwt import encode_token, decode_token, verify_token
-
-
 @pytest.fixture
 def token_valide():
     return encode_token(
