@@ -1,0 +1,13 @@
+[flake8]
+max-line-length = 120
+exclude = venv, migrations, .git
+extend-ignore =
+    W292,
+    W293,
+    W291,
+    E302,
+    E303,
+    E125,
+    F401
+per-file-ignores =
+    tests/*:F841
