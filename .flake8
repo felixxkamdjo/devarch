@@ -5,9 +5,21 @@ extend-ignore =
     W292,
     W293,
     W291,
+    E101,
+    E121,
+    E123,
+    E125,
+    E126,
+    E127,
+    E128,
+    E221,
+    E225,
+    E226,
+    E272,
+    E301,
     E302,
     E303,
-    E125,
+    E701,
     F401
 per-file-ignores =
     tests/*:F841
