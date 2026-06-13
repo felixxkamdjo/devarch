@@ -1,0 +1,14 @@
+global:
+  application_name: devarch
+  branch: null
+  default_ec2_keyname: null
+  default_platform: python-3.12
+  default_region: eu-west-1
+  include_git_submodules: true
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: null
+  repository: null
+  sc: git
+  workspace_type: Application
