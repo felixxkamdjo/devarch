@@ -70,6 +70,7 @@ jobs:
           RABBITMQ_HOST: localhost
           RABBITMQ_USER: devarch
           RABBITMQ_PASS: devarch123
+          PYTHONPATH: .
         run: |
           python -m pytest tests/unit/ \
             --tb=short -v \
