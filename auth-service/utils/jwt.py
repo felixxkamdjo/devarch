@@ -3,12 +3,13 @@ import os
 import time
 import jwt
 
-SECRET_KEY       = os.environ.get("JWT_SECRET_KEY")
-ALGORITHM        = "HS256"
+SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
+ALGORITHM = "HS256"
 TOKEN_EXPIRATION = 3600  # 1 heure
 
 if not SECRET_KEY:
     raise RuntimeError("JWT_SECRET_KEY manquante dans les variables d'environnement")
+
 
 def encode_token(user_id, email, role, user_firstname="", user_lastname=""):
     """
@@ -17,12 +18,12 @@ def encode_token(user_id, email, role, user_firstname="", user_lastname=""):
     (content-service) de stocker author_name sans appeler auth-service.
     """
     payload = {
-        "user_id":        user_id,
-        "email":          email,
-        "role":           role,
+        "user_id": user_id,
+        "email": email,
+        "role": role,
         "user_firstname": user_firstname,
-        "user_lastname":  user_lastname,
-        "exp":            int(time.time()) + TOKEN_EXPIRATION
+        "user_lastname": user_lastname,
+        "exp": int(time.time()) + TOKEN_EXPIRATION,
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 

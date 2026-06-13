@@ -1,7 +1,7 @@
 from repositories.category_repository import (
     get_all_categories,
     get_category_by_id,
-    create_category
+    create_category,
 )
 
 

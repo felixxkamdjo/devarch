@@ -3,7 +3,6 @@
 import sqlite3
 from pathlib import Path
 
-
 # Paths
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "auth.db"

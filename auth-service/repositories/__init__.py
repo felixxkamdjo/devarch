@@ -1,1 +1,7 @@
-from .users import create_user, get_user_by_id, get_user_by_email, update_user, delete_user
+from .users import (
+    create_user,
+    get_user_by_id,
+    get_user_by_email,
+    update_user,
+    delete_user,
+)

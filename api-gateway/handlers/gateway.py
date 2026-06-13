@@ -1,8 +1,7 @@
 from services.proxy import forward_request
 
-
 CORS_HEADERS = [
-    ("Access-Control-Allow-Origin",  "http://localhost:8080"),
+    ("Access-Control-Allow-Origin", "http://localhost:8080"),
     ("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS"),
     ("Access-Control-Allow-Headers", "Content-Type, Authorization"),
 ]
@@ -15,7 +14,7 @@ def add_cors(handler):
 
 def gateway_handler(handler, service_name):
 
-    #  Preflight OPTIONS 
+    #  Preflight OPTIONS
     if handler.command == "OPTIONS":
         handler.send_response(204)
         add_cors(handler)
@@ -35,7 +34,7 @@ def gateway_handler(handler, service_name):
             method=handler.command,
             path=handler.path,
             headers=dict(handler.headers),
-            body=body
+            body=body,
         )
 
         handler.send_response(response["status"])
@@ -52,12 +51,13 @@ def gateway_handler(handler, service_name):
 
     except Exception as error:
         import traceback
+
         print(f"[GATEWAY ERROR] {traceback.format_exc()}", flush=True)
 
         handler.send_response(500)
         handler.send_header("Content-Type", "application/json")
-        
+
         add_cors(handler)
-        
+
         handler.end_headers()
         handler.wfile.write(str(error).encode())

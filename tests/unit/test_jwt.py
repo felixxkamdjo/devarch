@@ -9,6 +9,7 @@ from pathlib import Path
 if "jwt" in sys.modules and hasattr(sys.modules["jwt"], "_mock_name"):
     sys.modules.pop("jwt")
     import jwt as _real_jwt
+
     sys.modules["jwt"] = _real_jwt
     # Recharge auth_service.utils.jwt avec le vrai jwt
     if "auth_service.utils.jwt" in sys.modules:
@@ -20,11 +21,16 @@ if "jwt" in sys.modules and hasattr(sys.modules["jwt"], "_mock_name"):
     spec.loader.exec_module(mod)
 
 from auth_service.utils.jwt import encode_token, decode_token, verify_token
+
+
 @pytest.fixture
 def token_valide():
     return encode_token(
-        user_id=1, email="felix@devarch.io",
-        role="author", user_firstname="Felix", user_lastname="Kamdjo"
+        user_id=1,
+        email="felix@devarch.io",
+        role="author",
+        user_firstname="Felix",
+        user_lastname="Kamdjo",
     )
 
 
@@ -81,19 +87,28 @@ class TestVerifyToken:
 
     def test_token_expire_retourne_none(self):
         import jwt as pyjwt
+
         expired = pyjwt.encode(
-            {"user_id": 1, "email": "x@x.io", "role": "author",
-             "user_firstname": "", "user_lastname": "",
-             "exp": int(time.time()) - 10},
-            "my-super-secret-key", algorithm="HS256"
+            {
+                "user_id": 1,
+                "email": "x@x.io",
+                "role": "author",
+                "user_firstname": "",
+                "user_lastname": "",
+                "exp": int(time.time()) - 10,
+            },
+            "my-super-secret-key",
+            algorithm="HS256",
         )
         assert verify_token(expired) is None
 
     def test_token_fausse_signature_retourne_none(self):
         import jwt as pyjwt
+
         forged = pyjwt.encode(
             {"user_id": 999, "role": "admin", "exp": int(time.time()) + 3600},
-            "fausse_cle", algorithm="HS256"
+            "fausse_cle",
+            algorithm="HS256",
         )
         assert verify_token(forged) is None
 

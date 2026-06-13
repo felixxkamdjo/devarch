@@ -9,9 +9,11 @@ def route_request(handler):
         return gateway_handler(handler, "auth")
 
     # CONTENT SERVICE — articles, categories, comments
-    if (path.startswith("/articles")
-            or path.startswith("/categories")
-            or path.startswith("/comments")):
+    if (
+        path.startswith("/articles")
+        or path.startswith("/categories")
+        or path.startswith("/comments")
+    ):
         return gateway_handler(handler, "content")
 
     # MEDIA SERVICE
@@ -21,9 +23,13 @@ def route_request(handler):
     # OPTIONS preflight sur route inconnue
     if handler.command == "OPTIONS":
         handler.send_response(204)
-        handler.send_header("Access-Control-Allow-Origin",  "http://localhost:8080")
-        handler.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        handler.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        handler.send_header("Access-Control-Allow-Origin", "http://localhost:8080")
+        handler.send_header(
+            "Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS"
+        )
+        handler.send_header(
+            "Access-Control-Allow-Headers", "Content-Type, Authorization"
+        )
         handler.end_headers()
         return
 

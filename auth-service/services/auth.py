@@ -29,7 +29,7 @@ def register_user(user_firstname, user_lastname, email, password):
     if existing_user:
         raise ValueError("Email already exists.")
 
-    salt          = generate_salt()
+    salt = generate_salt()
     password_hash = hash_password(password, salt)
 
     create_user(
@@ -37,17 +37,17 @@ def register_user(user_firstname, user_lastname, email, password):
         user_lastname=user_lastname,
         email=email,
         password_hash=password_hash,
-        salt=salt
+        salt=salt,
     )
 
     created_user = get_user_by_email(email)
 
     return {
-        "id":             created_user["id"],
+        "id": created_user["id"],
         "user_firstname": created_user["user_firstname"],
-        "user_lastname":  created_user["user_lastname"],
-        "email":          created_user["email"],
-        "role":           created_user["role"]
+        "user_lastname": created_user["user_lastname"],
+        "email": created_user["email"],
+        "role": created_user["role"],
     }
 
 
@@ -61,31 +61,29 @@ def login_user(email, password):
         raise ValueError("Invalid credentials.")
 
     is_valid = verify_password(
-        password=password,
-        salt=user["salt"],
-        stored_hash=user["password_hash"]
+        password=password, salt=user["salt"], stored_hash=user["password_hash"]
     )
     if not is_valid:
         raise ValueError("Invalid credentials.")
 
-    # Token avec user_firstname inclus 
+    # Token avec user_firstname inclus
     token = encode_token(
-        user_id=        user["id"],
-        email=          user["email"],
-        role=           user["role"],
-        user_firstname= user["user_firstname"],
-        user_lastname=  user["user_lastname"]
+        user_id=user["id"],
+        email=user["email"],
+        role=user["role"],
+        user_firstname=user["user_firstname"],
+        user_lastname=user["user_lastname"],
     )
 
     return {
         "token": token,
         "user": {
-            "id":             user["id"],
+            "id": user["id"],
             "user_firstname": user["user_firstname"],
-            "user_lastname":  user["user_lastname"],
-            "email":          user["email"],
-            "role":           user["role"]
-        }
+            "user_lastname": user["user_lastname"],
+            "email": user["email"],
+            "role": user["role"],
+        },
     }
 
 
@@ -98,14 +96,14 @@ def validate_user_token(token):
 
 def get_current_user(token):
     payload = validate_user_token(token)
-    user    = get_user_by_id(payload["user_id"])
+    user = get_user_by_id(payload["user_id"])
     if not user:
         raise ValueError("User not found.")
 
     return {
-        "id":             user["id"],
+        "id": user["id"],
         "user_firstname": user["user_firstname"],
-        "user_lastname":  user["user_lastname"],
-        "email":          user["email"],
-        "role":           user["role"]
+        "user_lastname": user["user_lastname"],
+        "email": user["email"],
+        "role": user["role"],
     }

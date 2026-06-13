@@ -52,9 +52,7 @@ make_package("auth_service.services", auth_service_root / "services")
 make_package("auth_service.repositories", auth_service_root / "repositories")
 make_package("content_service", content_service_root)
 make_package("content_service.services", content_service_root / "services")
-make_package(
-    "content_service.repositories", content_service_root / "repositories"
-)
+make_package("content_service.repositories", content_service_root / "repositories")
 make_package("content_service.events", content_service_root / "events")
 
 
@@ -77,9 +75,7 @@ sys.modules["auth_service.db"] = auth_db
 sys.modules["db"] = auth_db
 
 # Load auth_service modules
-load_module(
-    "auth_service.utils.security", auth_service_root / "utils/security.py"
-)
+load_module("auth_service.utils.security", auth_service_root / "utils/security.py")
 load_module("auth_service.utils.jwt", auth_service_root / "utils/jwt.py")
 
 # Bind and expose auth_service utility helpers
@@ -110,9 +106,7 @@ auth_repos.get_user_by_id = _users.get_user_by_id
 sys.modules["repositories"] = auth_repos
 
 # Load and map auth_service services
-load_module(
-    "auth_service.services.auth", auth_service_root / "services/auth.py"
-)
+load_module("auth_service.services.auth", auth_service_root / "services/auth.py")
 auth_services = sys.modules["auth_service.services"]
 auth_services.auth = sys.modules["auth_service.services.auth"]
 sys.modules["services"] = auth_services
@@ -136,9 +130,7 @@ load_module(
 content_events = sys.modules["content_service.events"]
 content_events.publisher = sys.modules["content_service.events.publisher"]
 sys.modules["events"] = content_events
-sys.modules["events.publisher"] = sys.modules[
-    "content_service.events.publisher"
-]
+sys.modules["events.publisher"] = sys.modules["content_service.events.publisher"]
 
 # Load and map content_service repositories
 load_module(
@@ -162,9 +154,7 @@ load_module(
 )
 content_services = sys.modules["content_service.services"]
 content_services.articles = sys.modules["content_service.services.articles"]
-sys.modules["services.articles"] = sys.modules[
-    "content_service.services.articles"
-]
+sys.modules["services.articles"] = sys.modules["content_service.services.articles"]
 
 # Final cleanup of shared global aliases
 for short in ["db", "repositories"]:

@@ -2,8 +2,10 @@
 import pytest
 from unittest.mock import patch
 from services.articles import (
-    create_article_service, get_article_service,
-    update_article_service, delete_article_service
+    create_article_service,
+    get_article_service,
+    update_article_service,
+    delete_article_service,
 )
 
 ARTICLES_SVC = "content_service.services.articles"
@@ -35,39 +37,43 @@ class TestCreateArticleServiceValidations:
 class TestCreateArticleServiceHappyPath:
 
     def test_retourne_article_id(self):
-        with patch(f"{ARTICLES_SVC}.create_article", return_value=42) as mock_create, \
-             patch(f"{ARTICLES_SVC}.publish"):
+        with patch(
+            f"{ARTICLES_SVC}.create_article", return_value=42
+        ) as mock_create, patch(f"{ARTICLES_SVC}.publish"):
             result = create_article_service("Mon article", "Contenu", author_id=1)
         assert result == 42
 
     def test_titre_strip_avant_sauvegarde(self):
         # Avoid space issues
-        with patch(f"{ARTICLES_SVC}.create_article", return_value=1) as mock_create, \
-             patch(f"{ARTICLES_SVC}.publish"):
+        with patch(
+            f"{ARTICLES_SVC}.create_article", return_value=1
+        ) as mock_create, patch(f"{ARTICLES_SVC}.publish"):
             create_article_service("  Mon article  ", "Contenu", author_id=1)
         args = mock_create.call_args[1]
         assert args["title"] == "Mon article"
 
     def test_status_draft_par_defaut(self):
-        with patch(f"{ARTICLES_SVC}.create_article", return_value=1) as mock_create, \
-             patch(f"{ARTICLES_SVC}.publish"):
+        with patch(
+            f"{ARTICLES_SVC}.create_article", return_value=1
+        ) as mock_create, patch(f"{ARTICLES_SVC}.publish"):
             create_article_service("Titre", "Contenu", author_id=1)
         assert mock_create.call_args[1]["status"] == "draft"
 
     def test_publish_appele_apres_creation(self):
-        with patch(f"{ARTICLES_SVC}.create_article", return_value=5), \
-             patch(f"{ARTICLES_SVC}.publish") as mock_publish:
+        with patch(f"{ARTICLES_SVC}.create_article", return_value=5), patch(
+            f"{ARTICLES_SVC}.publish"
+        ) as mock_publish:
             create_article_service("Titre", "Contenu", author_id=1, author_name="Felix")
         mock_publish.assert_called_once_with(
             "article.published",
-            {"article_id": 5, "title": "Titre",
-             "author_id": 1, "author_name": "Felix"}
+            {"article_id": 5, "title": "Titre", "author_id": 1, "author_name": "Felix"},
         )
 
     def test_author_name_none_devient_chaine_vide(self):
         # Convert None to empty string to avoid issues in publish payload
-        with patch(f"{ARTICLES_SVC}.create_article", return_value=1), \
-             patch(f"{ARTICLES_SVC}.publish") as mock_publish:
+        with patch(f"{ARTICLES_SVC}.create_article", return_value=1), patch(
+            f"{ARTICLES_SVC}.publish"
+        ) as mock_publish:
             create_article_service("Titre", "Contenu", author_id=1, author_name=None)
         payload = mock_publish.call_args[0][1]
         assert payload["author_name"] == ""
@@ -81,8 +87,13 @@ class TestGetArticleService:
                 get_article_service(9999)
 
     def test_article_existant_retourne_dict(self):
-        faux_article = {"id": 1, "title": "Test", "content": "Contenu",
-                        "author_id": 1, "status": "published"}
+        faux_article = {
+            "id": 1,
+            "title": "Test",
+            "content": "Contenu",
+            "author_id": 1,
+            "status": "published",
+        }
         with patch(f"{ARTICLES_SVC}.get_article_by_id", return_value=faux_article):
             result = get_article_service(1)
         assert result["id"] == 1
@@ -110,11 +121,10 @@ class TestUpdateArticleService:
 class TestDeleteArticleService:
 
     def test_delete_appelle_repository_avec_bon_id(self):
-        with patch(f"{ARTICLES_SVC}.get_article_by_id", return_value={"id": 7, "author_id": 1}) as mock_get, \
-            patch(f"{ARTICLES_SVC}.delete_article") as mock_delete:
+        with patch(
+            f"{ARTICLES_SVC}.get_article_by_id", return_value={"id": 7, "author_id": 1}
+        ) as mock_get, patch(f"{ARTICLES_SVC}.delete_article") as mock_delete:
             delete_article_service(
-                article_id=7,
-                requesting_user_id=1,
-                requesting_user_role="admin"
+                article_id=7, requesting_user_id=1, requesting_user_role="admin"
             )
         mock_delete.assert_called_once_with(7)

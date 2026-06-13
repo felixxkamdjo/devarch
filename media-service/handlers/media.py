@@ -19,10 +19,7 @@ def upload_file_handler(handler):
 
         result = save_file(file_data, filename, file_type)
 
-        send_json(handler, {
-            "success": True,
-            "data": result
-        }, 201)
+        send_json(handler, {"success": True, "data": result}, 201)
 
     except Exception:
         send_error(handler, "Upload failed", 500)
@@ -38,10 +35,7 @@ def delete_file_handler(handler, filename):
         if not success:
             return send_error(handler, "File not found", 404)
 
-        send_json(handler, {
-            "success": True,
-            "message": "File deleted"
-        })
+        send_json(handler, {"success": True, "message": "File deleted"})
 
     except Exception:
         send_error(handler, "Delete failed", 500)
@@ -54,10 +48,7 @@ def get_file_handler(handler, filename):
 
         path = get_file_path(filename)
 
-        send_json(handler, {
-            "success": True,
-            "path": path
-        })
+        send_json(handler, {"success": True, "path": path})
 
     except Exception:
         send_error(handler, "Error retrieving file", 500)

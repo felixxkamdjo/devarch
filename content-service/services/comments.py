@@ -3,7 +3,7 @@ from repositories.comment_repository import (
     get_comment_by_id,
     create_comment,
     update_comment,
-    delete_comment
+    delete_comment,
 )
 
 

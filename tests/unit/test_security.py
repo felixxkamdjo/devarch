@@ -39,7 +39,9 @@ class TestHashPassword:
         assert h1 == h2
 
     def test_sels_differents_donnent_hashes_differents(self):
-        assert hash_password("secret123", "sel_A") != hash_password("secret123", "sel_B")
+        assert hash_password("secret123", "sel_A") != hash_password(
+            "secret123", "sel_B"
+        )
 
     def test_mots_de_passe_differents_donnent_hashes_differents(self):
         assert hash_password("aaa", "sel") != hash_password("bbb", "sel")

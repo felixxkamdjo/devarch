@@ -2,13 +2,12 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 from router import route_request
 
-
 HOST = "0.0.0.0"
 PORT = 8000
 
 
 class GatewayHTTPRequestHandler(BaseHTTPRequestHandler):
-    
+
     def do_OPTIONS(self):
         route_request(self)
 
@@ -32,10 +31,7 @@ def run_server():
 
     HTTPServer.allow_reuse_address = True
 
-    server = HTTPServer(
-        (HOST, PORT),
-        GatewayHTTPRequestHandler
-    )
+    server = HTTPServer((HOST, PORT), GatewayHTTPRequestHandler)
 
     print(f"API Gateway running on {HOST}:{PORT}")
 

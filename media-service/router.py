@@ -1,8 +1,4 @@
-from handlers import (
-    upload_file_handler,
-    delete_file_handler,
-    get_file_handler
-)
+from handlers import upload_file_handler, delete_file_handler, get_file_handler
 
 from utils.http import send_error
 

@@ -1,7 +1,6 @@
 import os
 import uuid
 
-
 BASE_STORAGE = "storage"
 
 
@@ -28,7 +27,7 @@ def save_file(file_data, filename, folder="files"):
     return {
         "filename": new_filename,
         "path": file_path,
-        "url": f"/{folder}/{new_filename}"
+        "url": f"/{folder}/{new_filename}",
     }
 
 

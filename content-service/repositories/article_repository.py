@@ -1,17 +1,24 @@
 from db import get_connection
 
 
-def create_article(title, content, author_id, author_name=None,
-                   category_id=None, image_url=None, status="draft"):
+def create_article(
+    title,
+    content,
+    author_id,
+    author_name=None,
+    category_id=None,
+    image_url=None,
+    status="draft",
+):
     conn = get_connection()
-    cur  = conn.cursor()
+    cur = conn.cursor()
     cur.execute(
         """
         INSERT INTO articles
             (title, content, author_id, author_name, category_id, image_url, status)
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
-        (title, content, author_id, author_name, category_id, image_url, status)
+        (title, content, author_id, author_name, category_id, image_url, status),
     )
     conn.commit()
     article_id = cur.lastrowid
@@ -20,10 +27,10 @@ def create_article(title, content, author_id, author_name=None,
 
 
 def get_all_articles(status="published", category_id=None, limit=9, offset=0):
-    conn   = get_connection()
-    cur    = conn.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
     params = [status]
-    query  = """
+    query = """
         SELECT a.*, c.name AS category_name
         FROM articles a
         LEFT JOIN categories c ON a.category_id = c.id
@@ -44,7 +51,7 @@ def get_all_articles(status="published", category_id=None, limit=9, offset=0):
 
 def get_article_by_id(article_id):
     conn = get_connection()
-    cur  = conn.cursor()
+    cur = conn.cursor()
     cur.execute(
         """
         SELECT a.*, c.name AS category_name
@@ -52,17 +59,18 @@ def get_article_by_id(article_id):
         LEFT JOIN categories c ON a.category_id = c.id
         WHERE a.id = ?
         """,
-        (article_id,)
+        (article_id,),
     )
     row = cur.fetchone()
     conn.close()
     return dict(row) if row else None
 
 
-def update_article(article_id, title, content, status,
-                   category_id=None, image_url=None):
+def update_article(
+    article_id, title, content, status, category_id=None, image_url=None
+):
     conn = get_connection()
-    cur  = conn.cursor()
+    cur = conn.cursor()
     cur.execute(
         """
         UPDATE articles
@@ -71,7 +79,7 @@ def update_article(article_id, title, content, status,
             updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
         """,
-        (title, content, status, category_id, image_url, article_id)
+        (title, content, status, category_id, image_url, article_id),
     )
     conn.commit()
     conn.close()
@@ -79,7 +87,7 @@ def update_article(article_id, title, content, status,
 
 def delete_article(article_id):
     conn = get_connection()
-    cur  = conn.cursor()
+    cur = conn.cursor()
     cur.execute("DELETE FROM articles WHERE id = ?", (article_id,))
     conn.commit()
     conn.close()

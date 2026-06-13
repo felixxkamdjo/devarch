@@ -1,7 +1,6 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from router import route_request
 
-
 HOST = "0.0.0.0"
 PORT = 8004
 

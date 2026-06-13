@@ -1,7 +1,7 @@
 from services.categories import (
     list_categories_service,
     get_category_service,
-    create_category_service
+    create_category_service,
 )
 from utils.http import send_json, send_error, parse_json_body
 
@@ -26,10 +26,10 @@ def create_category_handler(handler):
     try:
         body = parse_json_body(handler)
         category_id = create_category_service(body.get("name"))
-        send_json(handler, {
-            "success": True,
-            "message": "Category created",
-            "id": category_id
-        }, 201)
+        send_json(
+            handler,
+            {"success": True, "message": "Category created", "id": category_id},
+            201,
+        )
     except ValueError as e:
         send_error(handler, str(e), 400)

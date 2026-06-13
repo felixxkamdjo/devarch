@@ -3,5 +3,5 @@ from .articles import (
     list_articles_handler,
     get_article_handler,
     update_article_handler,
-    delete_article_handler
+    delete_article_handler,
 )

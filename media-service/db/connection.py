@@ -3,10 +3,7 @@ import sqlite3
 
 DB_PATH = os.environ.get("DB_PATH", "/app/db/data.db")
 
-SCHEMA_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "schema.sql"
-)
+SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "schema.sql")
 
 
 def get_connection() -> sqlite3.Connection:

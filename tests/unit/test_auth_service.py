@@ -11,9 +11,13 @@ from services.auth import register_user, login_user, validate_user_token
 AUTH_SVC = "auth_service.services.auth"
 
 FAUX_USER_BASE = {
-    "id": 1, "user_firstname": "Felix", "user_lastname": "Kamdjo",
-    "email": "felix@devarch.io", "role": "author",
-    "salt": "sel_fixe", "password_hash": hash_password("password123", "sel_fixe")
+    "id": 1,
+    "user_firstname": "Felix",
+    "user_lastname": "Kamdjo",
+    "email": "felix@devarch.io",
+    "role": "author",
+    "salt": "sel_fixe",
+    "password_hash": hash_password("password123", "sel_fixe"),
 }
 
 
@@ -99,6 +103,7 @@ class TestValidateUserToken:
 
     def test_token_valide_retourne_payload(self):
         from utils.jwt import encode_token
+
         token = encode_token(1, "felix@devarch.io", "author")
         result = validate_user_token(token)
         assert result["user_id"] == 1

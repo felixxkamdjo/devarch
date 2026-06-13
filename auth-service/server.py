@@ -4,7 +4,6 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from router import route_request
 from db import init_db
 
-
 HOST = "0.0.0.0"
 PORT = 8002
 
@@ -42,15 +41,12 @@ def run_server():
 
     # Initialize database
     init_db()
-    
+
     # Allow port reuse
     HTTPServer.allow_reuse_address = True
 
     # Create server
-    server = HTTPServer(
-        (HOST, PORT),
-        AuthHTTPRequestHandler
-    )
+    server = HTTPServer((HOST, PORT), AuthHTTPRequestHandler)
 
     print(f"Auth service running on {HOST}:{PORT}")
 

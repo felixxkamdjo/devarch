@@ -1,10 +1,10 @@
-# 
+#
 
 import sqlite3
 import os
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "articles.db")
-SCHEMA  = os.path.join(os.path.dirname(__file__), "schema.sql")
+SCHEMA = os.path.join(os.path.dirname(__file__), "schema.sql")
 
 conn = sqlite3.connect(DB_PATH)
 with open(SCHEMA) as f:

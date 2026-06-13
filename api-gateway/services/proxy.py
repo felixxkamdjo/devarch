@@ -1,7 +1,6 @@
 import json
 import http.client
 
-
 # SERVICES = {
 #     "auth": ("localhost", 8002),
 #     "content": ("localhost", 8003),
@@ -12,7 +11,7 @@ import http.client
 SERVICES = {
     "auth": ("auth-service", 8002),
     "content": ("content-service", 8003),
-    "media": ("media-service", 8004)
+    "media": ("media-service", 8004),
 }
 
 
@@ -22,19 +21,10 @@ def forward_request(service_name, method, path, headers=None, body=None):
 
     connection = http.client.HTTPConnection(host, port)
 
-    connection.request(
-        method=method,
-        url=path,
-        body=body,
-        headers=headers or {}
-    )
+    connection.request(method=method, url=path, body=body, headers=headers or {})
 
     response = connection.getresponse()
 
     data = response.read()
 
-    return {
-        "status": response.status,
-        "headers": response.getheaders(),
-        "body": data
-    }
+    return {"status": response.status, "headers": response.getheaders(), "body": data}

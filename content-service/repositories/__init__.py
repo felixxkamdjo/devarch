@@ -3,5 +3,5 @@ from .article_repository import (
     get_article_by_id,
     get_all_articles,
     update_article,
-    delete_article
+    delete_article,
 )

@@ -4,23 +4,22 @@ import os
 import json
 import pika
 
-
 RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST", "localhost")
 RABBITMQ_USER = os.environ.get("RABBITMQ_USER", "devarch")
 RABBITMQ_PASS = os.environ.get("RABBITMQ_PASS", "devarch123")
 
 
 def _get_connection():
-    
+
     credentials = pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASS)
-    
-    params      = pika.ConnectionParameters(
+
+    params = pika.ConnectionParameters(
         host=RABBITMQ_HOST,
         credentials=credentials,
         connection_attempts=3,
-        retry_delay=2
+        retry_delay=2,
     )
-    
+
     return pika.BlockingConnection(params)
 
 
@@ -29,10 +28,10 @@ def publish(queue: str, payload: dict):
     Publie un message JSON dans la queue spécifiée.
     Silencieux en cas d'erreur — RabbitMQ est optionnel.
     """
-    
+
     try:
         connection = _get_connection()
-        channel    = connection.channel()
+        channel = connection.channel()
 
         # Déclare la queue (idempotent - créée si elle n'existe pas)
         channel.queue_declare(queue=queue, durable=True)
@@ -42,9 +41,8 @@ def publish(queue: str, payload: dict):
             routing_key=queue,
             body=json.dumps(payload),
             properties=pika.BasicProperties(
-                delivery_mode=2,      # message persistant
-                content_type="application/json"
-            )
+                delivery_mode=2, content_type="application/json"  # message persistant
+            ),
         )
 
         connection.close()

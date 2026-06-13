@@ -62,10 +62,7 @@ def create_comment(text, author_id, author_name, article_id):
             VALUES (?, ?, ?, ?)
         """
 
-        cur.execute(
-            query,
-            (text, author_id, author_name, article_id)
-        )
+        cur.execute(query, (text, author_id, author_name, article_id))
 
         conn.commit()
 

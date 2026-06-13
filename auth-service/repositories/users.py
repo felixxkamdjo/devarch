@@ -3,8 +3,9 @@
 from db import get_connection
 
 
-def create_user(user_firstname, user_lastname, email,
-                password_hash, salt, role="author"):
+def create_user(
+    user_firstname, user_lastname, email, password_hash, salt, role="author"
+):
     """
     Inserts a new user into the database.
     """
@@ -24,14 +25,9 @@ def create_user(user_firstname, user_lastname, email,
     VALUES (?, ?, ?, ?, ?, ?);
     """
 
-    cursor.execute(query, (
-        user_firstname,
-        user_lastname,
-        email,
-        password_hash,
-        salt,
-        role
-    ))
+    cursor.execute(
+        query, (user_firstname, user_lastname, email, password_hash, salt, role)
+    )
 
     connection.commit()
     connection.close()
@@ -101,8 +97,7 @@ def get_users():
     return users
 
 
-def update_user(user_id, user_firstname,
-                user_lastname, email, role):
+def update_user(user_id, user_firstname, user_lastname, email, role):
     """
     Updates user information.
     """
@@ -120,18 +115,12 @@ def update_user(user_id, user_firstname,
     WHERE id = ?;
     """
 
-    cursor.execute(query, (
-        user_firstname,
-        user_lastname,
-        email,
-        role,
-        user_id
-    ))
+    cursor.execute(query, (user_firstname, user_lastname, email, role, user_id))
 
     connection.commit()
     connection.close()
-    
-    
+
+
 def delete_user(user_id):
     """
     Deletes a user by ID.
