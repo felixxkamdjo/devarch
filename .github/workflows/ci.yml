@@ -122,10 +122,10 @@ jobs:
           fi
 
       - name: Automatic rollback on failure
-          if: failure() && steps.health_check.outcome == 'failure'
-          run: |
-            echo "Deployment failed — rolling back..."
-            PREVIOUS=$(eb appversion | grep "version" | head -n 2 | tail -n 1 | awk -F'|' '{print $2}' | tr -d ' ')
-            if [ ! -z "$PREVIOUS" ]; then
-              eb deploy Devarch-env --version $PREVIOUS
-            fi
+        if: failure() && steps.health_check.outcome == 'failure'
+        run: |
+          echo "Deployment failed — rolling back..."
+          PREVIOUS=$(eb appversion | grep "version" | head -n 2 | tail -n 1 | awk -F'|' '{print $2}' | tr -d ' ')
+          if [ ! -z "$PREVIOUS" ]; then
+            eb deploy Devarch-env --version $PREVIOUS
+          fi
