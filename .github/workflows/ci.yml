@@ -109,12 +109,12 @@ jobs:
           aws-region: eu-west-1
 
       - name: Deploy to Elastic Beanstalk
-        run: eb deploy devarch-env --timeout 10
+        run: eb deploy devarch --timeout 10
 
       - name: Health check after deployment
         id: health_check
         run: |
-          STATUS=$(eb status devarch-env | grep "Health:" | awk '{print $2}')
+          STATUS=$(eb status devarch | grep "Health:" | awk '{print $2}')
           echo "health=$STATUS" >> $GITHUB_OUTPUT
           if [ "$STATUS" != "Green" ]; then
             echo "Health check failed: $STATUS"
@@ -126,4 +126,4 @@ jobs:
         run: |
           echo "Deployment failed — rolling back..."
           PREVIOUS=$(eb appversion | grep -m2 "version" | tail -1 | awk '{print $2}')
-          eb deploy devarch-env --version-label $PREVIOUS
+          eb deploy devarch --version-label $PREVIOUS
