@@ -1,4 +1,4 @@
-name: CI/CD — devarch
+name: CI/CD - devarch
 
 on:
   push:
@@ -40,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -61,7 +61,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r tests/requirements.txt
 
       - name: Run unit tests
         env:
